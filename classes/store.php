@@ -8,7 +8,7 @@ class Store {
 	private $shopify_store;
 	private $brafton_api;
 	private $shopify_blogId;
-	static private $storeRoot;
+	private $storeRoot;
 
 	function __construct($api,$pw,$store,$blogid){
 

@@ -5,14 +5,16 @@ class storeConnect {
 	public $postData;
 	public $getUrl;
 	public $postUrl;
-	private $currentArticles;
+	public $currentArticles;
 	private $brafton_collection;
+	public $tag_collection;
 
 	function __construct($root,$url){
 		$this->base = $root;
 		$this->getUrl = $url;
 		$this->currentArticles = array();
 		$this->brafton_collection = array();
+		$this->tag_collection = array();
 	}
 
 	//return collection of brafton ids on demand
@@ -85,17 +87,24 @@ class storeConnect {
 
 	//Get collection of brafton ids from target blog
 	public function getArticleMeta(){
-		$temp = $this->getArticles();
+		$this->getArticles();
 		foreach($this->currentArticles as $article){
 			$metaUrl = $this->getMetafieldEndpoint($article->id);
 			$out = $this->storeGetRequest($metaUrl);
-			if(isset($out->metafields[0]->value)){
+			if(isset($out->metafields[0]->value)){ //look at index
 				array_push($this->brafton_collection,$out->metafields[0]->value);
 			}
 		}
 		return $this->brafton_collection;
 	}
 
+	//Get collection of tags
+	public function getStoreTags(){
+		foreach($this->currentArticles as $article){
+			array_push($this->tag_collection, $article->tags);
+		}
+		return $this->tag_collection;
+	}
 	//post article meta to blog article.  this happens after the article post to the shopify API
 	public function postArticleMeta($id,$meta){
 		$url = $this->getMetafieldEndpoint($id);
