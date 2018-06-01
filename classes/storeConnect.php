@@ -75,7 +75,7 @@ class storeConnect {
 		$this->postUrl = $this->base.'/articles.json';
 		$dis = $this->storePostRequest($this->postUrl,$obj);
 		//post meta field data to newly created blog	
-		$this->postArticleMeta($dis->article->id, $this->setPostMeta($arr['id']));
+		$this->postArticleMeta($dis->article->id, $this->setPostMeta('brafton_id',$arr['id']));
 		
 	}
 
@@ -91,7 +91,7 @@ class storeConnect {
 		foreach($this->currentArticles as $article){
 			$metaUrl = $this->getMetafieldEndpoint($article->id);
 			$out = $this->storeGetRequest($metaUrl);
-			if(isset($out->metafields[0]->value)){ //look at index
+			if(isset($out->metafields[0]->value)){ //look at index, loop through all metafields in search of brafton_id key
 				array_push($this->brafton_collection,$out->metafields[0]->value);
 			}
 		}
@@ -115,16 +115,16 @@ class storeConnect {
 	public function setPostData($article){
 		$post_data = array('article'=> 
 					array(
-						'title'=> (string)$article['headline'],
+						'title'=> $article['headline'],
 						'author'=>$article['byline'], 
-						'body_html'=>html_entity_decode($article['text']), 
-						'tags'=> (string)$article['categories'],
-						'summary_html'=> (string)$article['excerpt'],
+						'body_html'=>$article['text'], 
+						'tags'=> $article['categories'],
+						'summary_html'=> $article['excerpt'],
 						'image'=> array(
-							'width'=>(string)$article['image_width'],
-							'height'=>(string)$article['image_height'],
-							'src'=>(string)$article['image_url'],
-							'caption'=>(string)$article['caption']
+							'width'=>$article['image_width'],
+							'height'=>$article['image_height'],
+							'src'=>$article['image_url'],
+							'caption'=>$article['caption']
 						)
 					)
 				);
@@ -132,11 +132,11 @@ class storeConnect {
 	}
 
 	//ready article meta data for posting to Shopify API
-	public function setPostMeta($brafton_id){
+	public function setPostMeta($key, $value){ 
 		$metafield = array('metafield'=>
 			array(
-					'key'=> 'brafton_id',
-					'value'=> (string)$brafton_id,
+					'key'=> $key,
+					'value'=> (string)$value,
 					'value_type'=> 'string',
 					'namespace'=> 'blog'
 			)
