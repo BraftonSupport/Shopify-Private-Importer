@@ -8,6 +8,7 @@ class storeConnect {
 	public $currentArticles;
 	private $brafton_collection;
 	public $tag_collection;
+	private $link_array;
 
 	function __construct($root,$url){
 		$this->base = $root;
@@ -15,13 +16,28 @@ class storeConnect {
 		$this->currentArticles = array();
 		$this->brafton_collection = array();
 		$this->tag_collection = array();
+		$this->link_array = array();
 	}
 
+	//get individual Shopify Blog Article
+	public function getShopifyArticle($_id){
+		$url = $this->base.'/articles/'.$_id.'.json';
+		$single = $this->storeGetRequest($url);
+		return $single;
+	}
 	//return collection of brafton ids on demand
 	public function getBraftonCollection(){
 		return $this->brafton_collection;
 	}
+	//update existing Shopify article
+	public function updateArticle($arr){
+		$url = $this->base.'/articles/'.$arr['id'].'.json';
+		$obj = $this->setPutData($arr);
+		print_r($obj);
+		die();
+		$this->storePutRequest($url,$obj);
 
+	}
 	//get article data from Shopify API
 	public function getArticles(){
 		$location = $this->getUrl;
@@ -67,6 +83,28 @@ class storeConnect {
     		return json_decode($result);
     	}
 	}
+	//use for PUT requests to Shopify API
+	public function storePutRequest($location,$obj){
+		$crl = curl_init();
+		curl_setopt($crl, CURLOPT_URL, $location);
+		curl_setopt($crl, CURLOPT_CUSTOMREQUEST, "PUT");                                                                     
+		curl_setopt($crl, CURLOPT_POSTFIELDS, $obj);                                                                  
+		curl_setopt($crl, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($crl, CURLOPT_HTTPHEADER, array(                                                                          
+		    'Content-Type: application/json',                                                                                
+		    'Content-Length: ' . strlen($obj))                                                                       
+		);
+		curl_setopt($crl, CURLOPT_SSL_VERIFYPEER, false);                                                                                                                                                                                                                                        
+		$result = curl_exec($crl);
+		$errno = curl_errno($crl);
+    	$error = curl_error($crl);
+    	curl_close($crl);
+    	if ($errno > 0) {
+	        echo 'cURL error: ' . $error;
+	    } else {
+    		return json_decode($result);
+    	}
+	}
 
 	//Post Article to Shopify Blog
 	public function postArticle($arr){
@@ -93,9 +131,16 @@ class storeConnect {
 			$out = $this->storeGetRequest($metaUrl);
 			if(isset($out->metafields[0]->value)){ //look at index, loop through all metafields in search of brafton_id key
 				array_push($this->brafton_collection,$out->metafields[0]->value);
+				$this->link_array[$out->metafields[0]->value] = (string)$article->id;
 			}
 		}
 		return $this->brafton_collection;
+	}
+
+
+	//get link array 
+	public function getLinkArray(){
+		return $this->link_array;
 	}
 
 	//Get collection of tags
@@ -111,6 +156,26 @@ class storeConnect {
 		$this->storePostRequest($url,$meta);
 	}
 
+	//ready article general data for updating existing to Shopify Article
+	public function setPutData($article){
+		$post_data = array('article'=> 
+					array(
+						'id'=> $article['id'],
+						'title'=> $article['headline'],
+						'author'=>$article['byline'], 
+						'body_html'=>$article['text'], 
+						'tags'=> $article['categories'],
+						'summary_html'=> $article['excerpt'],
+						'image'=> array(
+							'width'=>$article['image_width'],
+							'height'=>$article['image_height'],
+							'src'=>$article['image_url'],
+							'caption'=>$article['caption']
+						)
+					)
+				);
+		return json_encode($post_data);
+	}
 	//ready article general data for posting to Shopify	API
 	public function setPostData($article){
 		$post_data = array('article'=> 

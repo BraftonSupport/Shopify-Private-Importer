@@ -12,7 +12,6 @@ class AdferoHelpers {
      * @return string 
      */
     public static function GetXMLFromUri($uri) {
-        echo '<br />'.$uri;
         $xml = simplexml_load_file($uri);
         return $xml->asXML();
     }

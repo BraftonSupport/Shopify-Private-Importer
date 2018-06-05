@@ -133,7 +133,6 @@ class AdferoVideoOutputsClient {
     private function GetVideoOutput($id, $properties, $fields) {
         $uri = $this->GetUri($id, null, "xml", $properties, $fields, null, null);
         $uri = "http://" . $this->credentials->getPublicKey() . ":" . $this->credentials->getSecretKey() . "@" . str_replace("http://", "", $uri);
-        echo '<br />'.$uri;
         $xmlString = AdferoHelpers::GetXMLFromUri($uri);
         return $this->GetVideoOutputFromXmlString($xmlString);
     }
