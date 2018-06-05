@@ -36,24 +36,27 @@ function compareCollections($items, $collection,$s,$type) {
 			
 			$single = $s->getShopifyArticle($linker[$brafton_id]);
 			$shop_date = $single->article->updated_at;
-			if($item->getLastModifiedDate()<$shop_date) {
+			if($item->getLastModifiedDate()>$shop_date) {
 				echo 'post should be updated <br />';
 				$article_data = setArticleData($item);
 				$article_data['id'] = $linker[$brafton_id];
 				$s->updateArticle($article_data);
+			} else{
+				echo '<span style="font-size:22px;display: block;text-align: center;">Article  '.$brafton_id.' already exists in blog </span><br />';
 			}
-			//$connection->getLinkArray();
-			//echo $linker[$brafton_id].'<br />';
-			//echo '<span style="font-size:22px;display: block;text-align: center;">Article  '.$brafton_id.' already exists in blog </span><br />';
 		}else{
-			if($type=='articles'){
-				$article_data = setArticleData($item);
-			}else{
-				$article_data = setVideoData($item);
-			}
-			echo '<br /> Comparison failed. ';
-			//$storeConnection->postArticle($article_data);
+			$article_data = setBlogPostData($item,$type);
+			echo '<br /> Adding post '.$item->getHeadline().' to the Blog.';
+			$s->postArticle($article_data);
 		}
+	}
+}
+
+function setBlogPostData($item,$type) {
+	if($type=='articles'){
+		return setArticleData($item);
+	}else{
+		return setVideoData($item);
 	}
 }
 

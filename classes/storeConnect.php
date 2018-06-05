@@ -122,16 +122,26 @@ class storeConnect {
 		$endpoint = $this->base.'/articles/'.$a.'/'.'metafields.json';
 		return $endpoint;
 	}
+	//array helper function to extract brafton id from shopify metafields endpoint object
+	public function metaHelper($meta_fields){
+		foreach($meta_fields as $field){
+			if($field->key == 'brafton_id'){
+				return $field->value;
+			}				
+		}
+	}
 
 	//Get collection of brafton ids from target blog
 	public function getArticleMeta(){
 		$this->getArticles();
 		foreach($this->currentArticles as $article){
 			$metaUrl = $this->getMetafieldEndpoint($article->id);
-			$out = $this->storeGetRequest($metaUrl);
-			if(isset($out->metafields[0]->value)){ //look at index, loop through all metafields in search of brafton_id key
-				array_push($this->brafton_collection,$out->metafields[0]->value);
-				$this->link_array[$out->metafields[0]->value] = (string)$article->id;
+			$metaOut = $this->storeGetRequest($metaUrl);
+			$brafton_meta = $this->metaHelper($metaOut->metafields);
+			echo $brafton_meta;
+			if(isset($brafton_meta)){ //look at index, loop through all metafields in search of brafton_id key
+				array_push($this->brafton_collection,$brafton_meta);
+				$this->link_array[$brafton_meta] = (string)$article->id;
 			}
 		}
 		return $this->brafton_collection;
