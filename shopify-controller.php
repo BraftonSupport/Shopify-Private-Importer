@@ -70,8 +70,8 @@ function setArticleData($a){
 		'created'=> $a->getCreatedDate(), 
 		'publish'=> $a->getPublishDate(),
 		'byline'=> $a->getByLine() ?: 'brafton',
-		'text'=> $a->getText() ?: $a->getHtmlMetaDescription(),
-		'excerpt'=> $a->getExtract(),
+		'text'=> $a->getText(),
+		'excerpt'=> $a->getExtract() ?: $a->getHtmlMetaDescription(),
 		'image_url'=> $large->getUrl(),
 		'image_width'=> $large->getWidth(),
 		'image_height'=> $large->getHeight(),
@@ -82,6 +82,29 @@ function setArticleData($a){
 
 }
 
+function setVideoData($title,$excerpt,$date,$strContent,$image,$braf_id){
+	$ready_video_data = array('headline'=> $title, 
+		'id'=> $braf_id, 
+		'created'=> $date, 
+		'publish'=> $date,
+		'byline'=> 'brafton',
+		'text'=> $strContent,
+		'excerpt'=> $excerpt,
+		'image_url'=> '',
+		'image_width'=> '',
+		'image_height'=> '',
+		'caption'=> '',
+		'categories'=> ''
+	);
+	print_r($excerpt);
+	die();
+}
+
+function generate_source_tag($src, $resolution){
+    $tag = ''; 
+    $ext = pathinfo($src, PATHINFO_EXTENSION); 
+    return sprintf('<source src="%s" type="video/%s" data-resolution="%s" />', $src, $ext, $resolution );
+}
 
 function getBraftonVideos($collection){
 	$private = '29f07cf9-50c8-42b5-abf0-123eb614d4fd';
@@ -95,7 +118,7 @@ function getBraftonVideos($collection){
 	$client = new AdferoClient($baseURL, $public, $private);
 	$videoOutClient = $videoClient->videoOutputs();
 	$photos = $client->ArticlePhotos();
-	$photoURI = 'http://'.str_replace('http://api', 'pictures',$domain).'/v2/';
+	$photoURI = 'http://'.str_replace('api', 'pictures',$domain).'/v2/';
 	$photoClient = new AdferoPhotoClient($photoURI);
 	$scale_axis = 500;
 	$scale = 500;
@@ -123,21 +146,21 @@ function getBraftonVideos($collection){
 			$brafton_id = $a->id;
 			$articles_imported++;
 			if($articles_imported>5) break;
-			echo "POSTING: ".$post_title."<br>";
+			//echo "POSTING: ".$post_title."<br>";
 			$slug=str_replace(' ','-',$post_title);
 			// Enter Author Tag
 			$categories = $client->Categories();
 			if(isset($categories->ListForArticle($a->id,0,100)->items[0]->id)){
 				$categoryId = $categories->ListForArticle($a->id,0,100)->items[0]->id;
 				$category = $categories->Get($categoryId);
-				echo "<br><b>Category Name:</b>".$category->name."<br>";
+				//echo "<br><b>Category Name:</b>".$category->name."<br>";
 				$createCat[] = $category->name;
 			}
 		
 			$thisPhoto = $photos->ListForArticle($brafton_id,0,100);
 			if(isset($thisPhoto->items[0]->id)){
 					$photoId = $photos->Get($thisPhoto->items[0]->id)->sourcePhotoId;
-					echo 'Photo Id : '.$photoId.'<br/>';
+					//echo 'Photo Id : '.$photoId.'<br/>';
 					$photoURL = $photoClient->Photos()->GetScaleLocationUrl($photoId, $scale_axis, $scale)->locationUri;
 					//echo 'Photo url : '.$photoURL.'<br/>';
 					$post_image = strtok($photoURL, '?');
@@ -150,7 +173,7 @@ function getBraftonVideos($collection){
 					// 	$post_image = upload_image($post_image);
 					// }
 				$excerptImage = '<img src="' . $post_image . '" style = "width:300px;height:auto;vertical-align:middle; margin-bottom: 3px;float:right"  alt="Google Logo" />';
-				$post_excerpt =  $excerptImage . $post_excerpt;
+				//$post_excerpt =  $excerptImage . $post_excerpt;
 			}
 			// $photos = $a->getPhotos();
 			// $image = $photos[0]->getLarge();
@@ -162,6 +185,7 @@ function getBraftonVideos($collection){
 			//     $post_excerpt = $post_excerpt.'<img src = "'.$post_image.'" alt ="" /><p>'.$post_content.'</p>' ;
 			// }
 			$presplash = $thisArticle->fields['preSplash'];
+			$presplash = convertProtocol($presplash);
 			$postsplash = $thisArticle->fields['postSplash'];
 			$videoList=$videoOutClient->ListForArticle($brafton_id,0,10);
 			$list=$videoList->items;
@@ -172,16 +196,19 @@ function getBraftonVideos($collection){
 				//logMsg($output->path);
 				$type = $output->type;
 				$path = $output->path;
+				// echo $path;
+				// die();
 				$resolution = $output->height;
-				// $source = generate_source_tag( $path, $resolution );
-				// $embedCode .= $source;
+				$source = generate_source_tag( $path, $resolution );
+				$embedCode .= $source;
 			}
 			$embedCode .= '</video>';
 			//old code
 			//$embedCode = $videoClient->VideoPlayers()->GetWithFallback($brafton_id, 'redbean', 1, 'rcflashplayer', 1);
 			$ctascript = '';
-			if (video_player == "atlantisjs"){
-				/*
+			$video_player = "atlantisjs";
+			if ($video_player == "atlantisjs"){
+
 				$script = '<script type="text/javascript">';
 				$script .=  'var atlantisVideo = AtlantisJS.Init({';
 				$script .=  'videos: [{';
@@ -190,14 +217,13 @@ function getBraftonVideos($collection){
 				$script .= '});';
 				$script .=  '</script>';
 				$ctascript = $script;
-				*/
 				$ctas = '';
-				$pause_text = video_pause_text;
-				$pause_link = video_pause_link;
-				$end_title = video_end_title;
-				$end_sub = video_end_subtitle;
-				$end_link = video_end_button_link;
-				$end_text = video_end_button_text;
+				$pause_text = '';
+				$pause_link = '';
+				$end_title = '';
+				$end_sub = '';
+				$end_link = '';
+				$end_text = '';
 				if($pause_text != ''){
 					$ctas =<<<EOT
 						,
@@ -233,7 +259,8 @@ EOC;
 				create/publish posts
 				tbd: topics (categories), not hotlinking images?
 				*/
-				$author = author_id;
+				$post_image = convertProtocol($post_image);
+				setVideoData($post_title,$post_excerpt, $post_date, $strPost, $post_image,$brafton_id);
 				/*$post = new brafton_post($post_title,$post_excerpt,$slug,$strPost,$post_excerpt,$author,$article_topics,true, $post_date,$ctascript, $post_image);
 				$id = $post->article_id;
 				if(post_status == 'published'){
@@ -241,6 +268,10 @@ EOC;
 				}*/
 	}
    }
+}
+
+function convertProtocol($address){
+	return str_replace('http','https',$address);
 }
 
 if($video_client) :

@@ -33,8 +33,6 @@ class storeConnect {
 	public function updateArticle($arr){
 		$url = $this->base.'/articles/'.$arr['id'].'.json';
 		$obj = $this->setPutData($arr);
-		print_r($obj);
-		die();
 		$this->storePutRequest($url,$obj);
 
 	}
@@ -138,7 +136,6 @@ class storeConnect {
 			$metaUrl = $this->getMetafieldEndpoint($article->id);
 			$metaOut = $this->storeGetRequest($metaUrl);
 			$brafton_meta = $this->metaHelper($metaOut->metafields);
-			echo $brafton_meta;
 			if(isset($brafton_meta)){ //look at index, loop through all metafields in search of brafton_id key
 				array_push($this->brafton_collection,$brafton_meta);
 				$this->link_array[$brafton_meta] = (string)$article->id;
@@ -166,7 +163,7 @@ class storeConnect {
 		$this->storePostRequest($url,$meta);
 	}
 
-	//ready article general data for updating existing to Shopify Article
+	//ready article general data for updating existing Shopify Article
 	public function setPutData($article){
 		$post_data = array('article'=> 
 					array(
@@ -186,7 +183,7 @@ class storeConnect {
 				);
 		return json_encode($post_data);
 	}
-	//ready article general data for posting to Shopify	API
+	//ready general article data for posting to Shopify	API
 	public function setPostData($article){
 		$post_data = array('article'=> 
 					array(
