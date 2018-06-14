@@ -7,7 +7,7 @@ spl_autoload_register(function ($class_name) {
 });
 
 //set up a new store
-$store = new Store('SHOPIFY_PRIVATE_KEY','SHOPIFY_PRIVATE_PW','brafton-importer','12680069178');
+$store = new Store('SHOPIFY_PRIVATE_KEY','PRIVATE_KEY_PW','brafton-importer','12680069178');
 $video_client = true;
 $url = $store->getStoreRoot()."/articles.json";
 
@@ -19,8 +19,11 @@ $storeConnection = new storeConnect($store->getStoreRoot(),$url);
 $collection = $storeConnection->getArticleMeta();
 
 //connect to Brafton XML feed
-$brafton_connect = new ApiHandler('92599a2e-a5d6-41ff-93ac-11484207dc9d','https://api.brafton.com');
+$brafton_connect = new ApiHandler('93a5855f-db69-4884-b226-219e4db36860','https://api.brafton.com');
 $articles = $brafton_connect->getNewsHTML();
+if(!$articles) {
+	echo 'Article feed is empty.<br />';
+}
 compareCollections($articles, $collection,$storeConnection,'articles');
 
 //compare collections
@@ -47,7 +50,7 @@ function compareCollections($items, $collection,$s,$type) {
 		}else{
 			$article_data = setBlogPostData($item,$type);
 			echo '<br /> Adding post '.$item->getHeadline().' to the Blog.';
-			$s->postArticle($article_data);
+			$s->postArticle($article_data,'article');
 		}
 	}
 }
@@ -65,6 +68,16 @@ function setArticleData($a){
 	$image = $a->getPhotos();
 	$large = $image[0]->getLarge();
 	$cats = $a->getCategories();
+	$shop_cat = array();
+	foreach($cats as $cat){
+		array_push($shop_cat, $cat->getName());
+
+	}
+	array_push($shop_cat, 'Trucking');
+	// echo '<pre>';
+	// var_dump($shop_cat);
+	// echo '</pre>';
+	// echo implode(',',$shop_cat);
 	$ready_data = array('headline'=> $a->getHeadline(), 
 		'id'=> $a->getId(), 
 		'created'=> $a->getCreatedDate(), 
@@ -76,13 +89,21 @@ function setArticleData($a){
 		'image_width'=> $large->getWidth(),
 		'image_height'=> $large->getHeight(),
 		'caption'=> $image[0]->getAlt(),
-		'categories'=> $cats[0]->getName() //fix later to accommodate multiple categories
+		'categories'=> setCatString($cats) //fix later to accommodate multiple categories
 	);
 	return $ready_data;
 
 }
 
-function setVideoData($title,$excerpt,$date,$strContent,$image,$braf_id){
+function setCatString($cats){
+	$string_cats = array();
+	foreach($cats as $cat) {
+		array_push($string_cats, $cat->getName());
+	}
+	return implode(', ', $string_cats);
+}
+
+function setVideoData($title,$excerpt,$date,$strContent,$image,$braf_id,$kitty){
 	$ready_video_data = array('headline'=> $title, 
 		'id'=> $braf_id, 
 		'created'=> $date, 
@@ -90,14 +111,13 @@ function setVideoData($title,$excerpt,$date,$strContent,$image,$braf_id){
 		'byline'=> 'brafton',
 		'text'=> $strContent,
 		'excerpt'=> $excerpt,
-		'image_url'=> '',
+		'image_url'=> $image,
 		'image_width'=> '',
 		'image_height'=> '',
 		'caption'=> '',
-		'categories'=> ''
+		'categories'=> $kitty
 	);
-	print_r($excerpt);
-	die();
+	return $ready_video_data;
 }
 
 function generate_source_tag($src, $resolution){
@@ -106,9 +126,9 @@ function generate_source_tag($src, $resolution){
     return sprintf('<source src="%s" type="video/%s" data-resolution="%s" />', $src, $ext, $resolution );
 }
 
-function getBraftonVideos($collection){
-	$private = '29f07cf9-50c8-42b5-abf0-123eb614d4fd';
-	$public = 'U4S7U8A9'; 
+function getBraftonVideos($collection, $st){
+	$private = '30c7bcb5-b82b-42e5-afec-d3cd0e4eae6a';
+	$public = 'XKS5R983'; 
 	$domain = 'api.brafton.com';
 	//echo " Videos: <br/>";
 	$params = array('max'=>99);
@@ -133,16 +153,16 @@ function getBraftonVideos($collection){
 	//fix for video feed issue present on june 24 2015.  video feeds are supposed to be sorted by modified date in desc order but are showing up in asc order instead. //remove once fixed. note dk
 	$articles->items = array_reverse($articles->items);
    foreach ($articles->items as $a) {
-		//max of five articles imported
+		
 		$thisArticle = $client->Articles()->Get($a->id);
-		//var_dump($thisArticle);
+		//check if video blog does not exist in Shopify
 		if(!in_array($a->id,$collection)) {
 			$strPost = '';
 			$createCat = array();
 			$post_title = $thisArticle->fields['title'];
 			$post_date = $thisArticle->fields['lastModifiedDate'];
 			$post_content = $thisArticle->fields['content'];
-			$post_excerpt = $thisArticle->fields['extract'];
+			$post_excerpt = $thisArticle->fields['extract']  ?? ' ';
 			$brafton_id = $a->id;
 			$articles_imported++;
 			if($articles_imported>5) break;
@@ -150,13 +170,14 @@ function getBraftonVideos($collection){
 			$slug=str_replace(' ','-',$post_title);
 			// Enter Author Tag
 			$categories = $client->Categories();
+			
 			if(isset($categories->ListForArticle($a->id,0,100)->items[0]->id)){
 				$categoryId = $categories->ListForArticle($a->id,0,100)->items[0]->id;
 				$category = $categories->Get($categoryId);
 				//echo "<br><b>Category Name:</b>".$category->name."<br>";
 				$createCat[] = $category->name;
+				$single_cat = $category->name ?? ' ';
 			}
-		
 			$thisPhoto = $photos->ListForArticle($brafton_id,0,100);
 			if(isset($thisPhoto->items[0]->id)){
 					$photoId = $photos->Get($thisPhoto->items[0]->id)->sourcePhotoId;
@@ -164,7 +185,7 @@ function getBraftonVideos($collection){
 					$photoURL = $photoClient->Photos()->GetScaleLocationUrl($photoId, $scale_axis, $scale)->locationUri;
 					//echo 'Photo url : '.$photoURL.'<br/>';
 					$post_image = strtok($photoURL, '?');
-					//echo 'Photo image : '.$post_image.'<br/>';
+					//'Photo image : '.$post_image.'<br/>';
 					$post_image_caption = $photos->Get($thisPhoto->items[0]->id)->fields['caption'];
 					//echo 'Photo caption : '.$post_image_caption.'<br/>';
 					$image_alt = '';
@@ -260,7 +281,8 @@ EOC;
 				tbd: topics (categories), not hotlinking images?
 				*/
 				$post_image = convertProtocol($post_image);
-				setVideoData($post_title,$post_excerpt, $post_date, $strPost, $post_image,$brafton_id);
+				$video_cache = setVideoData($post_title,$post_excerpt, $post_date, $strPost, $post_image,$brafton_id,$single_cat);
+				$st->postArticle($video_cache, 'video');
 				/*$post = new brafton_post($post_title,$post_excerpt,$slug,$strPost,$post_excerpt,$author,$article_topics,true, $post_date,$ctascript, $post_image);
 				$id = $post->article_id;
 				if(post_status == 'published'){
@@ -275,7 +297,7 @@ function convertProtocol($address){
 }
 
 if($video_client) :
-	$videos = getBraftonVideos($collection);
+	$videos = getBraftonVideos($collection, $storeConnection);
 endif;
   
 ?>

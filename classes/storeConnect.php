@@ -105,16 +105,40 @@ class storeConnect {
 	}
 
 	//Post Article to Shopify Blog
-	public function postArticle($arr){
+	public function postArticle($arr, $article_type=null){
 		$obj = $this->setPostData($arr);
 				
 		$this->postUrl = $this->base.'/articles.json';
 		$dis = $this->storePostRequest($this->postUrl,$obj);
-		//post meta field data to newly created blog	
-		$this->postArticleMeta($dis->article->id, $this->setPostMeta('brafton_id',$arr['id']));
-		
+		//post meta field data to newly created blog, need to send an array of objects here and loop through in order to utilize more than one metafield
+		$meta_array = $this->setPostMeta('brafton_id',$arr['id'], $article_type);
+		foreach($meta_array as $meta){
+			$json_meta = json_encode($meta);
+			$this->postArticleMeta($dis->article->id, $json_meta);
+		}
 	}
 
+	//ready article meta data for posting to Shopify API
+	public function setPostMeta($key, $value, $type){ 
+		$metafields = array( array('metafield'=>
+										array(
+												'key'=> $key,
+												'value'=> (string)$value,
+												'value_type'=> 'string',
+												'namespace'=> 'blog'
+										)
+									),
+						array('metafield'=>
+									array(
+											'key'=> 'type',
+											'value'=> $type,
+											'value_type'=> 'string',
+											'namespace'=> 'blog'
+									)
+								)
+		);
+		return $metafields;
+	}
 	//build url for article metafield endpoint
 	public function getMetafieldEndpoint($a){
 		$endpoint = $this->base.'/articles/'.$a.'/'.'metafields.json';
@@ -201,19 +225,6 @@ class storeConnect {
 					)
 				);
 		return json_encode($post_data);
-	}
-
-	//ready article meta data for posting to Shopify API
-	public function setPostMeta($key, $value){ 
-		$metafield = array('metafield'=>
-			array(
-					'key'=> $key,
-					'value'=> (string)$value,
-					'value_type'=> 'string',
-					'namespace'=> 'blog'
-			)
-		);
-		return json_encode($metafield);
 	}
 }
 
