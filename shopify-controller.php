@@ -1,13 +1,14 @@
 <?php
 
 require_once 'libraries.php';
+include 'specs.php';
 
 spl_autoload_register(function ($class_name) {
     include 'classes/'.$class_name .'.php';
 });
 
 //set up a new store
-$store = new Store('SHOPIFY_PRIVATE_KEY','PRIVATE_KEY_PW','brafton-importer','12680069178');
+$store = new Store(SHOPIFY_PRIVATE_KEY,SHOPIFY_PRIVATE_PW,SHOPIFY_STORE_NAME,SHOPIFY_BLOG_ID);
 $video_client = true;
 $url = $store->getStoreRoot()."/articles.json";
 
@@ -19,7 +20,7 @@ $storeConnection = new storeConnect($store->getStoreRoot(),$url);
 $collection = $storeConnection->getArticleMeta();
 
 //connect to Brafton XML feed
-$brafton_connect = new ApiHandler('93a5855f-db69-4884-b226-219e4db36860','https://api.brafton.com');
+$brafton_connect = new ApiHandler(brafton_api,domain);
 $articles = $brafton_connect->getNewsHTML();
 if(!$articles) {
 	echo 'Article feed is empty.<br />';
