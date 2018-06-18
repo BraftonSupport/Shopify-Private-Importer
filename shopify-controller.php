@@ -20,7 +20,14 @@ $storeConnection = new storeConnect($store->getStoreRoot(),$url);
 $collection = $storeConnection->getArticleMeta();
 
 //connect to Brafton XML feed
-$brafton_connect = new ApiHandler(brafton_api,domain);
+try{
+	$brafton_connect = new ApiHandler(brafton_api,domain);
+} catch (Exception $e) {
+	echo 'Caught exception: ',  $e->getMessage();
+	echo '<br /> Please check your API key';
+	die();
+}
+
 $articles = $brafton_connect->getNewsHTML();
 if(!$articles) {
 	echo 'Article feed is empty.<br />';
@@ -104,7 +111,7 @@ function setCatString($cats){
 	return implode(', ', $string_cats);
 }
 
-function setVideoData($title,$excerpt,$date,$strContent,$image,$braf_id,$kitty){
+function setVideoData($title,$excerpt,$date,$strContent,$image,$braf_id,$kitty=null){
 	$ready_video_data = array('headline'=> $title, 
 		'id'=> $braf_id, 
 		'created'=> $date, 
@@ -128,12 +135,10 @@ function generate_source_tag($src, $resolution){
 }
 
 function getBraftonVideos($collection, $st){
-	$private = '30c7bcb5-b82b-42e5-afec-d3cd0e4eae6a';
-	$public = 'XKS5R983'; 
-	$domain = 'api.brafton.com';
-	//echo " Videos: <br/>";
+	$private = brafton_private_key;
+	$public = brafton_public_key; 
+	$domain = preg_replace('/https:\/\//','',domain);
 	$params = array('max'=>99);
-	//$baseURL = 'http://livevideo.api.brafton.com/v2/';
 	$baseURL = 'http://livevideo.'.str_replace('http://', '',$domain).'/v2/';
 	$videoClient = new AdferoVideoClient($baseURL, $public, $private);
 	$client = new AdferoClient($baseURL, $public, $private);
@@ -172,13 +177,16 @@ function getBraftonVideos($collection, $st){
 			// Enter Author Tag
 			$categories = $client->Categories();
 			
+			$single_cat;
 			if(isset($categories->ListForArticle($a->id,0,100)->items[0]->id)){
 				$categoryId = $categories->ListForArticle($a->id,0,100)->items[0]->id;
 				$category = $categories->Get($categoryId);
 				//echo "<br><b>Category Name:</b>".$category->name."<br>";
 				$createCat[] = $category->name;
 				$single_cat = $category->name ?? ' ';
-			}
+			} else {
+				$single_cat = '';
+			} 
 			$thisPhoto = $photos->ListForArticle($brafton_id,0,100);
 			if(isset($thisPhoto->items[0]->id)){
 					$photoId = $photos->Get($thisPhoto->items[0]->id)->sourcePhotoId;
@@ -265,6 +273,7 @@ function getBraftonVideos($collection, $st){
 EOT;
 				}
 				$ctascript =<<<EOC
+				<script type='text/javascript' src='https://atlantisjs.brafton.com/v1/atlantis.min.v1.3.js'></script>
 					<script type="text/javascript">
 						var atlantisVideo = AtlantisJS.Init({
 							videos:[{
@@ -274,7 +283,7 @@ EOT;
 				</script>
 EOC;
 				}
-				$strPost = $embedCode . $post_content;
+				$strPost = $embedCode . $ctascript . $post_content;
 				//echo $post_image;
 				//echo $strPost."<br>";
 				/*
@@ -297,7 +306,7 @@ function convertProtocol($address){
 	return str_replace('http','https',$address);
 }
 
-if($video_client) :
+if(video_import) :
 	$videos = getBraftonVideos($collection, $storeConnection);
 endif;
   
