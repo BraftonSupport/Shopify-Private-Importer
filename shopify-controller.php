@@ -72,20 +72,14 @@ function setBlogPostData($item,$type) {
 }
 
 function setArticleData($a){
-
 	$image = $a->getPhotos();
 	$large = $image[0]->getLarge();
 	$cats = $a->getCategories();
 	$shop_cat = array();
 	foreach($cats as $cat){
 		array_push($shop_cat, $cat->getName());
-
 	}
 	array_push($shop_cat, 'Trucking');
-	// echo '<pre>';
-	// var_dump($shop_cat);
-	// echo '</pre>';
-	// echo implode(',',$shop_cat);
 	$ready_data = array('headline'=> $a->getHeadline(), 
 		'id'=> $a->getId(), 
 		'created'=> $a->getCreatedDate(), 
