@@ -189,13 +189,17 @@ class storeConnect {
 
 	//ready article general data for updating existing Shopify Article
 	public function setPutData($article){
+		$raw = substr($article['published'],0,7);
+		$archival = date('Y F', strtotime($raw));
+		echo $archival;
+		exit();
 		$post_data = array('article'=> 
 					array(
 						'id'=> $article['id'],
 						'title'=> $article['headline'],
 						'author'=>$article['byline'], 
 						'body_html'=>$article['text'], 
-						'tags'=> $article['categories'],
+						'tags'=> $article['categories'], $archival,
 						'summary_html'=> $article['excerpt'],
 						'image'=> array(
 							'width'=>$article['image_width'],
@@ -209,12 +213,14 @@ class storeConnect {
 	}
 	//ready general article data for posting to Shopify	API
 	public function setPostData($article){
+		$raw = substr($article['publish'],0,7);
+		$archival = date('Y F', strtotime($raw));
 		$post_data = array('article'=> 
 					array(
 						'title'=> $article['headline'],
 						'author'=>$article['byline'], 
 						'body_html'=>$article['text'], 
-						'tags'=> $article['categories'],
+						'tags'=> $article['categories'].', '. $archival,
 						'summary_html'=> $article['excerpt'],
 						'image'=> array(
 							'width'=>$article['image_width'],
