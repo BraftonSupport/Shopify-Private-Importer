@@ -9,7 +9,6 @@ spl_autoload_register(function ($class_name) {
 
 //set up a new store
 $store = new Store(SHOPIFY_PRIVATE_KEY,SHOPIFY_PRIVATE_PW,SHOPIFY_STORE_NAME,SHOPIFY_BLOG_ID);
-$video_client = true;
 $url = $store->getStoreRoot()."/articles.json";
 
 //set connection to Shopify blog
@@ -100,7 +99,7 @@ function setCatString($cats){
 	foreach($cats as $cat) {
 		array_push($string_cats, $cat->getName());
 	}
-	return implode(', ', $string_cats);
+	return implode(', ', $string_cats); //send over multiple categories as comma-separated string
 }
 
 function setVideoData($title,$excerpt,$date,$strContent,$image,$braf_id,$kitty=null){
