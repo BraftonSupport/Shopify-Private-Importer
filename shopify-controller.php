@@ -41,8 +41,6 @@ function compareCollections($items, $collection,$s,$type) {
 		$brafton_id = $item->getId();
 		
 		$linker = $s->getLinkArray();
-		// echo '<pre>';
-		// print_r($linker);
 		if(array_key_exists($brafton_id,$linker)){
 			
 			$single = $s->getShopifyArticle($linker[$brafton_id]);
@@ -91,7 +89,7 @@ function setArticleData($a){
 		'image_width'=> $large->getWidth(),
 		'image_height'=> $large->getHeight(),
 		'caption'=> $image[0]->getAlt(),
-		'categories'=> setCatString($cats) //fix later to accommodate multiple categories
+		'categories'=> setCatString($cats)
 	);
 	return $ready_data;
 
@@ -147,12 +145,9 @@ function getBraftonVideos($collection, $st){
 	$articleClient=$client->Articles();
 	//CHANGE FEED NUM HERE
 	$articles = $articleClient->ListForFeed($feedList->items[0]->id,'live',0,100);
-	// echo '<pre>';
-	// var_dump($articles);
 	$articles_imported = 0;
-	//fix for video feed issue present on june 24 2015.  video feeds are supposed to be sorted by modified date in desc order but are showing up in asc order instead. //remove once fixed. note dk
 	$articles->items = array_reverse($articles->items);
-   foreach ($articles->items as $a) {
+    foreach ($articles->items as $a) {
 		
 		$thisArticle = $client->Articles()->Get($a->id);
 		//check if video blog does not exist in Shopify
@@ -175,7 +170,6 @@ function getBraftonVideos($collection, $st){
 			if(isset($categories->ListForArticle($a->id,0,100)->items[0]->id)){
 				$categoryId = $categories->ListForArticle($a->id,0,100)->items[0]->id;
 				$category = $categories->Get($categoryId);
-				//echo "<br><b>Category Name:</b>".$category->name."<br>";
 				$createCat[] = $category->name;
 				$single_cat = $category->name ?? ' ';
 			} else {
@@ -184,30 +178,13 @@ function getBraftonVideos($collection, $st){
 			$thisPhoto = $photos->ListForArticle($brafton_id,0,100);
 			if(isset($thisPhoto->items[0]->id)){
 					$photoId = $photos->Get($thisPhoto->items[0]->id)->sourcePhotoId;
-					//echo 'Photo Id : '.$photoId.'<br/>';
 					$photoURL = $photoClient->Photos()->GetScaleLocationUrl($photoId, $scale_axis, $scale)->locationUri;
-					//echo 'Photo url : '.$photoURL.'<br/>';
 					$post_image = strtok($photoURL, '?');
-					//'Photo image : '.$post_image.'<br/>';
 					$post_image_caption = $photos->Get($thisPhoto->items[0]->id)->fields['caption'];
-					//echo 'Photo caption : '.$post_image_caption.'<br/>';
 					$image_alt = '';
 					$image_id = $thisPhoto->items[0]->id;
-					// if(image_import){
-					// 	$post_image = upload_image($post_image);
-					// }
 				$excerptImage = '<img src="' . $post_image . '" style = "width:300px;height:auto;vertical-align:middle; margin-bottom: 3px;float:right"  alt="Google Logo" />';
-				//$post_excerpt =  $excerptImage . $post_excerpt;
 			}
-			// $photos = $a->getPhotos();
-			// $image = $photos[0]->getLarge();
-			// $post_image = $image->getUrl();
-			// if(!empty($post_image)){
-			//     $image_id = $photos[0]->getId();
-			//     $image_small = $photos[0]->getThumb();
-			//     $post_image_small = $image_small->getURL();
-			//     $post_excerpt = $post_excerpt.'<img src = "'.$post_image.'" alt ="" /><p>'.$post_content.'</p>' ;
-			// }
 			$presplash = $thisArticle->fields['preSplash'];
 			$presplash = convertProtocol($presplash);
 			$postsplash = $thisArticle->fields['postSplash'];
@@ -217,18 +194,13 @@ function getBraftonVideos($collection, $st){
 			$embedCode = sprintf( "<video id='video-%s' class=\"ajs-default-skin atlantis-js\" controls preload=\"auto\" width='512' height='288' poster='%s' >", $brafton_id, $presplash );
 			foreach($list as $listItem){
 				$output=$videoOutClient->Get($listItem->id);
-				//logMsg($output->path);
 				$type = $output->type;
 				$path = $output->path;
-				// echo $path;
-				// die();
 				$resolution = $output->height;
 				$source = generate_source_tag( $path, $resolution );
 				$embedCode .= $source;
 			}
 			$embedCode .= '</video>';
-			//old code
-			//$embedCode = $videoClient->VideoPlayers()->GetWithFallback($brafton_id, 'redbean', 1, 'rcflashplayer', 1);
 			$ctascript = '';
 			$video_player = "atlantisjs";
 			if ($video_player == "atlantisjs"){
@@ -278,26 +250,20 @@ EOT;
 EOC;
 				}
 				$strPost = $embedCode . $ctascript . $post_content;
-				//echo $post_image;
-				//echo $strPost."<br>";
-				/*
-				create/publish posts
-				tbd: topics (categories), not hotlinking images?
-				*/
 				$post_image = convertProtocol($post_image);
 				$video_cache = setVideoData($post_title,$post_excerpt, $post_date, $strPost, $post_image,$brafton_id,$single_cat);
 				$st->postArticle($video_cache, 'video');
-				/*$post = new brafton_post($post_title,$post_excerpt,$slug,$strPost,$post_excerpt,$author,$article_topics,true, $post_date,$ctascript, $post_image);
-				$id = $post->article_id;
-				if(post_status == 'published'){
-					$post->publish_post($id);
-				}*/
 	}
    }
 }
 
 function convertProtocol($address){
-	return str_replace('http','https',$address);
+	$pos = strpos($url, 'http');
+	if ($pos === false) {
+		return $address;
+	} else{
+		return str_replace('http','https',$address);
+	}	
 }
 
 if(video_import) :
