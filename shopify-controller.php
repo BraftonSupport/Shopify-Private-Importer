@@ -147,7 +147,7 @@ function getBraftonVideos($collection, $st){
 	$articles = $articleClient->ListForFeed($feedList->items[0]->id,'live',0,100);
 	$articles_imported = 0;
 	$articles->items = array_reverse($articles->items);
-   foreach ($articles->items as $a) {
+    foreach ($articles->items as $a) {
 		
 		$thisArticle = $client->Articles()->Get($a->id);
 		//check if video blog does not exist in Shopify
@@ -258,7 +258,12 @@ EOC;
 }
 
 function convertProtocol($address){
-	return str_replace('http','https',$address);
+	$pos = strpos($url, 'http');
+	if ($pos === false) {
+		return $address;
+	} else{
+		return str_replace('http','https',$address);
+	}	
 }
 
 if(video_import) :
