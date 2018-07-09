@@ -4,5 +4,6 @@ require_once 'RCClientLibrary/AdferoArticles/AdferoClient.php';
 require_once 'RCClientLibrary/AdferoPhotos/AdferoPhotoClient.php';
 require_once 'BraftonLibrary/BraftonImporter.php';
 require_once 'SampleAPIClientLibrary/ApiHandler.php';
+require_once 'general-functions.php';
 
 ?>
