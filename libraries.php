@@ -6,4 +6,8 @@ require_once 'BraftonLibrary/BraftonImporter.php';
 require_once 'SampleAPIClientLibrary/ApiHandler.php';
 require_once 'general-functions.php';
 
+spl_autoload_register(function ($class_name) {
+    include 'classes/'.$class_name .'.php';
+});
+
 ?>
