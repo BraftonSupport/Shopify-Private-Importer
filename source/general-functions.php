@@ -11,10 +11,8 @@ function compareCollections($items, $collection,$s,$type) {
 	$linker = array();
 	foreach ($items as $item) {
 		$brafton_id = $item->getId();
-		
 		$linker = $s->getLinkArray();
 		if(array_key_exists($brafton_id,$linker)){
-			
 			$single = $s->getShopifyArticle($linker[$brafton_id]);
 			$shop_date = $single->article->updated_at;
 			if($item->getLastModifiedDate()>$shop_date) {
@@ -61,7 +59,6 @@ function setArticleData($a){
 		'categories'=> setCatString($cats)
 	);
 	return $ready_data;
-
 }
 
 function setCatString($cats){
@@ -90,7 +87,7 @@ function setVideoData($title,$excerpt,$date,$strContent,$image,$braf_id,$kitty=n
 	return $ready_video_data;
 }
 
-//used in building video tag delivered to blog
+//used in building video tag source element delivered to blog
 function generate_source_tag($src, $resolution){
     $tag = ''; 
     $ext = pathinfo($src, PATHINFO_EXTENSION); 
@@ -119,8 +116,7 @@ function getBraftonVideos($collection, $st){
 	$articles = $articleClient->ListForFeed($feedList->items[0]->id,'live',0,100);
 	$articles_imported = 0;
 	$articles->items = array_reverse($articles->items);
-    foreach ($articles->items as $a) {
-		
+    foreach ($articles->items as $a) {	
 		$thisArticle = $client->Articles()->Get($a->id);
 		//check if video blog does not exist in Shopify
 		if(!in_array($a->id,$collection)) {
@@ -137,7 +133,6 @@ function getBraftonVideos($collection, $st){
 			$slug=str_replace(' ','-',$post_title);
 			// Enter Author Tag
 			$categories = $client->Categories();
-			
 			$single_cat;
 			if(isset($categories->ListForArticle($a->id,0,100)->items[0]->id)){
 				$categoryId = $categories->ListForArticle($a->id,0,100)->items[0]->id;
@@ -155,14 +150,13 @@ function getBraftonVideos($collection, $st){
 					$post_image_caption = $photos->Get($thisPhoto->items[0]->id)->fields['caption'];
 					$image_alt = '';
 					$image_id = $thisPhoto->items[0]->id;
-				$excerptImage = '<img src="' . $post_image . '" style = "width:300px;height:auto;vertical-align:middle; margin-bottom: 3px;float:right"  alt="Google Logo" />';
+					$excerptImage = '<img src="' . $post_image . '" style = "width:300px;height:auto;vertical-align:middle; margin-bottom: 3px;float:right"  alt="Google Logo" />';
 			}
 			$presplash = $thisArticle->fields['preSplash'];
 			$presplash = convertProtocol($presplash);
 			$postsplash = $thisArticle->fields['postSplash'];
 			$videoList=$videoOutClient->ListForArticle($brafton_id,0,10);
 			$list=$videoList->items;
-			
 			$embedCode = sprintf( "<video id='video-%s' class=\"ajs-default-skin atlantis-js\" controls preload=\"auto\" width='512' height='288' poster='%s' >", $brafton_id, $presplash );
 			foreach($list as $listItem){
 				$output=$videoOutClient->Get($listItem->id);
