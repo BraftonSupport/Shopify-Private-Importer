@@ -61,6 +61,7 @@ function setArticleData($a){
 	return $ready_data;
 }
 
+//set category string here
 function setCatString($cats){
 	$string_cats = array();
 	foreach($cats as $cat) {
