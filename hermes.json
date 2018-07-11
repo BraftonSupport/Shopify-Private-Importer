@@ -1,0 +1,19 @@
+{
+    "name": "Shopify Importer",
+    "account": "braftonsupport",
+    "repo": "Shopify-Private-Importer",
+    "global": {
+        "targetroot": "/var/www/html/tech/shopify/core",
+        "owner": "apache",
+        "group": "www"
+    },
+    "deploy": [
+        {
+            "tag": "live",
+            "branch": "master",
+            "afterinstall": "scripts/after.sh",
+            "source": "source",
+            "target": "${GLOBAL_TARGETROOT}"
+        }
+    ]
+}
