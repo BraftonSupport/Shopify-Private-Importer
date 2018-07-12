@@ -126,7 +126,7 @@ function getBraftonVideos($collection, $st){
 			$post_title = $thisArticle->fields['title'];
 			$post_date = $thisArticle->fields['lastModifiedDate'];
 			$post_content = $thisArticle->fields['content'];
-			$post_excerpt = $thisArticle->fields['extract']  ?? ' ';
+			$post_excerpt = $thisArticle->fields['extract']  ? $thisArticle->fields['extract'] : ' ';
 			$brafton_id = $a->id;
 			$articles_imported++;
 			if($articles_imported>5) break;
@@ -139,7 +139,7 @@ function getBraftonVideos($collection, $st){
 				$categoryId = $categories->ListForArticle($a->id,0,100)->items[0]->id;
 				$category = $categories->Get($categoryId);
 				$createCat[] = $category->name;
-				$single_cat = $category->name ?? ' ';
+				$single_cat = $category->name ? $category->name : ' ';
 			} else {
 				$single_cat = '';
 			} 
