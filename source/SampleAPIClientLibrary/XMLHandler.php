@@ -20,6 +20,7 @@ class XMLHandler {
 	if(!preg_match('/^https?:\/\//', $url)){
 		$url = 'file://' . $url;
 	}
+	echo $url . '<br />';
 
 		 $this->doc = new DOMDocument();
     if(!isset($ch)){
@@ -27,9 +28,9 @@ class XMLHandler {
     }
     curl_setopt ($ch, CURLOPT_URL, $url);
     curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 60);
+	curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 60);
     $feed_string = curl_exec($ch);
-    
+    echo $feed_string . '<br />';
 		if(!$this->doc->loadXML($feed_string)) {
 			echo $url."<br>";
 			throw new XMLLoadException($url);
