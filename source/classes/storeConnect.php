@@ -189,10 +189,8 @@ class storeConnect {
 
 	//ready article general data for updating existing Shopify Article
 	public function setPutData($article){
-		$raw = substr($article['published'],0,7);
+		$raw = substr($article['publish'],0,7);
 		$archival = date('Y F', strtotime($raw));
-		echo $archival;
-		exit();
 		$post_data = array('article'=> 
 					array(
 						'id'=> $article['id'],
