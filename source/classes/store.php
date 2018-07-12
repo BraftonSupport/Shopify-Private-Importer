@@ -2,7 +2,7 @@
 
 //Basic class for Shopify Blog Client
 
-class Store {
+class store {
 	private $shopify_api;
 	private $shopify_pw;
 	private $shopify_store;
