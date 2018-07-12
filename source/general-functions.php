@@ -2,10 +2,6 @@
 
 require_once 'libraries.php';
 
-spl_autoload_register(function ($class_name) {
-    include 'classes/'.$class_name .'.php';
-});
-
 //compare collections
 function compareCollections($items, $collection,$s,$type) {
 	$linker = array();
