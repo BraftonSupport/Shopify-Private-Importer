@@ -5,38 +5,13 @@ class storeConnect {
 	public $postData;
 	public $getUrl;
 	public $postUrl;
-	public $currentArticles;
-	private $brafton_collection;
-	private $link_array;
+	public $currentArticles = array();
+	private $brafton_collection = array();
+	private $link_array = array();
 
 	function __construct($root,$url){
 		$this->base = $root;
 		$this->getUrl = $url;
-		$this->currentArticles = (object) array( 
-			'id'=>'',
-			"title"=>'',
-			"created_at"=>'',
-			"body_html"=>'',
-			"blog_id"=>'',
-			"author"=>'',
-			"user_id"=>'',
-			"published_at"=>'',
-			"updated_at"=>'',
-			"summary_html"=>'',
-			"template_suffix"=>'',
-			"handle"=>'',
-			"tags"=>'',
-			"admin_graphql_api_id"=>'',
-			"image"=>(object) array(
-				"created_at"=>'',
-				"alt"=>'',
-				"width"=>'',
-				"height"=>'',
-				"src"=>''
-			)
-		);
-		$this->brafton_collection = array();
-		$this->link_array = array(0=>'test');
 	}
 
 	//get individual Shopify Blog Article
