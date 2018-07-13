@@ -1,6 +1,6 @@
 <?php
 
-class storeConnect {
+class StoreConnect {
 	public $base;
 	public $postData;
 	public $getUrl;

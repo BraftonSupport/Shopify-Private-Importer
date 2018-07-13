@@ -12,14 +12,11 @@ class ShopifyImporter extends MasterImporter{
 
 }
 //set up a new store
-$store = new store(SHOPIFY_PRIVATE_KEY,SHOPIFY_PRIVATE_PW,SHOPIFY_STORE_NAME,SHOPIFY_BLOG_ID);
+$store = new Store(SHOPIFY_PRIVATE_KEY,SHOPIFY_PRIVATE_PW,SHOPIFY_STORE_NAME,SHOPIFY_BLOG_ID);
 $url = $store->getStoreRoot()."/articles.json";
 
 //set connection to Shopify blog
-$storeConnection = new storeConnect($store->getStoreRoot(),$url);
-
-//return collection of brafton ids from Shopify blog
-$collection = $storeConnection->getArticleMeta();
+$storeConnection = new StoreConnect($store->getStoreRoot(),$url);
 
 //connect to Brafton XML feed
 try{
@@ -34,11 +31,11 @@ if(!$articles) {
     exit('Article feed is empty.<br />');
 }
 
-$importer = new ShopifyImporter(); //begin import process here
-$post_updates = $importer->compareCollections($articles, $storeConnection); // return array of newsListItems
+$shop_importer = new ShopifyImporter(); //begin import process here
+$post_updates = $shop_importer->compareCollections($articles, $storeConnection); // return array of newsListItems
 if(count($post_updates)>0){
-    $importer->importArticles($post_updates,$storeConnection);
+    $shop_importer->importArticles($post_updates,$storeConnection);
 }
 if(video_import) :
-	$videos = $importer->getBraftonVideos($collection, $storeConnection);
+	$videos = $shop_importer->getBraftonVideos($collection, $storeConnection);
 endif;

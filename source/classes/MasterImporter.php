@@ -12,8 +12,8 @@ abstract class MasterImporter{
     public function compareCollections($items, $s) {
         foreach ($items as $item) {
             $brafton_id = $item->getId();
-            $this->linker = $s->getLinkArray();
-            if(!array_key_exists($brafton_id,$this->linker) || $this->checkForUpdate($s, $this->linker, $item, $brafton_id)){
+            $this->linker = $s->getArticleMeta();
+            if(!in_array($brafton_id,$this->linker)|| $this->checkForUpdate($s, $this->linker, $item, $brafton_id)){
                 array_push($this->articles_to_post,$item);
             } else {
                 echo '<span style="font-size:22px;display: block;text-align: center;">Article  '.$brafton_id.' already exists in blog </span><br />';
@@ -26,7 +26,7 @@ abstract class MasterImporter{
     public function checkForUpdate($obj, $link, $current, $brafton_id ){
         $single = $obj->getShopifyArticle($link[$brafton_id]);
         $shop_date = $single->article->updated_at;
-        if($current->getLastModifiedDate() > $shop_date && isset($_GET['override2'])) { //add get parameter test
+        if($current->getLastModifiedDate() > $shop_date && isset($_GET['override'])) { //add get parameter test
             return true;
         } else {
             return false;
