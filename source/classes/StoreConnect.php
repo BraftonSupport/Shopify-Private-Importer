@@ -188,8 +188,6 @@ class StoreConnect {
 	public function setPutData($article){
 		$raw = substr($article['publish'],0,7);
 		$archival = date('Y F', strtotime($raw));
-		echo $archival;
-		exit();
 		$post_data = array('article'=> 
 					array(
 						'id'=> $article['id'],

@@ -10,7 +10,7 @@ class XMLHandler {
 	/** @var Document */
 	private $doc;
 
-  static $ch;
+  	static $ch;
   
 	/**
 	 * @param String $url
@@ -21,21 +21,19 @@ class XMLHandler {
 		$url = 'file://' . $url;
 	}
 
-		 $this->doc = new DOMDocument();
+	$this->doc = new DOMDocument();
     if(!isset($ch)){
       $ch = curl_init();
     }
     curl_setopt ($ch, CURLOPT_URL, $url);
     curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 60);
+	curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 60);
     $feed_string = curl_exec($ch);
-    
-		if(!$this->doc->loadXML($feed_string)) {
-			echo $url."<br>";
-			throw new XMLLoadException($url);
-		}
-
+	if(!$this->doc->loadXML($feed_string)) {
+		echo $url."<br>";
+		throw new XMLLoadException($url);
 	}
+}
   
   /*
   public static function CURL_pull($url,$timeout) { // use CURL library to fetch remote file
