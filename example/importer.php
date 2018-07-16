@@ -39,6 +39,7 @@ if(!$articles) {
 
 $shop_importer = new ShopifyImporter(); //begin import process here
 $post_updates = $shop_importer->compareCollections($articles, $storeConnection); // return array of newsListItems
+var_dump($post_updates);
 if(count($post_updates)>0){
     $shop_importer->importArticles($post_updates,$storeConnection);
 }
