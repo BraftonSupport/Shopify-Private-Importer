@@ -13,6 +13,9 @@ abstract class MasterImporter{
         foreach ($items as $item) {
             $brafton_id = $item->getId();
             $this->linker = $s->getLinkArray();
+            echo $brafton_id;
+            echo '<pre>';
+            var_dump($this->linker);
             var_dump(array_key_exists($brafton_id,$this->linker));
             die();
             if(!in_array($brafton_id,$this->linker)){
