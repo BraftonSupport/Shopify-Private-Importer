@@ -13,7 +13,7 @@
 	"shop_pw":"Shopify Private Application key password here",
 	"blog_id" : "Shopify Blog id here",
 	"brafton_api" : "Standard Brafton API Key",
-  "video" : true/false, //will the client subscribe to Brafton video blogs
+        "video" : true/false, //will the client subscribe to Brafton video blogs
 	"brafton_private":"Brafton private key",
 	"brafton_public":"Brafton public key"
 }
