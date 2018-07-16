@@ -6,6 +6,7 @@ Adding a new Shopify Importer client.
 2. Navigate to /var/www/html/tech/shopify/clients
 3. Add a new directory for client in the /clients folder.
 4. Create 2 new files or copy files from an existing client folder.  The files should be importer.php and shop-data.JSON.  Importer.php will generally be identical across all clients unless it has been decided to override the MasterImporter class.  Shop-data.JSON will contain a standard JSON object with all of the client's pertinent Shopify and Brafton credentials/options.
+
 {
 	"store_name" : "Shopify store name here",
 	"shop_private" : "Shopify Private Application key here",
