@@ -19,3 +19,18 @@
 }`
 
 5. Set a cron/scheduler job on the tech server.
+	Run command crontab -e
+	Press esc "i" to edit.
+	Tab to bottom of page and a new line.
+	Add 5 time parameters:
+		
+	    minute of the hour
+	    Hour of the day
+	    Day of the Month
+	    Month
+	    Day of the Week
+	add /usr/bin/wget
+	add full http path to importer file in new client folder.
+	17 2 * * 1-5 /usr/bin/wget http://tech.brafton.com/shopify/clients/{client-name}/importer.php
+
+	
