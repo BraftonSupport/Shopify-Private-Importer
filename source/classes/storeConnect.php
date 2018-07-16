@@ -29,13 +29,11 @@ class StoreConnect {
 		$url = $this->base.'/articles/'.$arr['id'].'.json';
 		$obj = $this->setPutData($arr);
 		$this->storePutRequest($url,$obj);
-
 	}
 	//get article data from Shopify API
 	public function getArticles(){
 		$location = $this->getUrl;
 		$output = $this->storeGetRequest($location);
-		
 		$this->currentArticles = $output->articles;
 		return $this->currentArticles;
 	}
@@ -105,13 +103,18 @@ class StoreConnect {
 		$obj = $this->setPostData($arr);
 				
 		$this->postUrl = $this->base.'/articles.json';
-		$dis = $this->storePostRequest($this->postUrl,$obj);
-		//post meta field data to newly created blog, need to send an array of objects here and loop through in order to utilize more than one metafield
-		$meta_array = $this->setPostMeta('brafton_id',$arr['id'], $article_type);
-		foreach($meta_array as $meta){
-			$json_meta = json_encode($meta);
-			$this->postArticleMeta($dis->article->id, $json_meta);
+		if(in_array($arr['id'], $this->getBraftonCollection())) {
+			$this->setPutData($arr);
+		} else{
+			$dis = $this->storePostRequest($this->postUrl,$obj);
+			//post meta field data to newly created blog, need to send an array of objects here and loop through in order to utilize more than one metafield
+			$meta_array = $this->setPostMeta('brafton_id',$arr['id'], $article_type);
+			foreach($meta_array as $meta){
+				$json_meta = json_encode($meta);
+				$this->postArticleMeta($dis->article->id, $json_meta);
+			}
 		}
+		
 	}
 
 	//ready article meta data for posting to Shopify API
@@ -151,19 +154,24 @@ class StoreConnect {
 
 	//Get collection of brafton ids from target blog
 	public function getArticleMeta(){
-		$this->getArticles();
+		$this->getArticles(); //get article data from shopify API
 		foreach($this->currentArticles as $article){
 			$metaUrl = $this->getMetafieldEndpoint($article->id);
 			$metaOut = $this->storeGetRequest($metaUrl);
 			$brafton_meta = $this->metaHelper($metaOut->metafields);
 			if(isset($brafton_meta)){ //look at index, loop through all metafields in search of brafton_id key
 				array_push($this->brafton_collection,$brafton_meta);
-				$this->link_array[$brafton_meta] = (string)$article->id;
+				$this->setLinkArray($brafton_meta,$article->id);
 			}
 		}
 		return $this->brafton_collection;
 	}
 
+
+	//set link array which associates brafton id with shopify article id
+	public function setLinkArray($bm, $artid){
+		$this->link_array[$bm] = (string)$artid;
+	}
 
 	//get link array 
 	public function getLinkArray(){
@@ -222,6 +230,4 @@ class StoreConnect {
 		return json_encode($post_data);
 	}
 }
-
-
 ?>

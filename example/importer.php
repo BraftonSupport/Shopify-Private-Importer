@@ -11,12 +11,18 @@ DefinedConstants::getConstants($refined);
 class ShopifyImporter extends MasterImporter{
 
 }
+
 //set up a new store
 $store = new Store(SHOPIFY_PRIVATE_KEY,SHOPIFY_PRIVATE_PW,SHOPIFY_STORE_NAME,SHOPIFY_BLOG_ID);
+
+//set store articles endpoint from Shopify API
 $url = $store->getStoreRoot()."/articles.json";
 
 //set connection to Shopify blog
 $storeConnection = new StoreConnect($store->getStoreRoot(),$url);
+
+//get collection of existing brafton ids 
+$collection = $storeConnection->getArticleMeta();
 
 //connect to Brafton XML feed
 try{
