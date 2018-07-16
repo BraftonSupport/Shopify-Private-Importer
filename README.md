@@ -29,8 +29,8 @@
 	    Day of the Month
 	    Month
 	    Day of the Week
-	add /usr/bin/wget
-	add full http path to importer file in new client folder.
+	add /usr/bin/wget<br />
+	add full http path to importer file in new client folder.<br />
 	17 2 * * 1-5 /usr/bin/wget http://tech.brafton.com/shopify/clients/{client-name}/importer.php
 
 	
