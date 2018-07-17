@@ -20,16 +20,19 @@ class StoreConnect {
 		$single = $this->storeGetRequest($url);
 		return $single;
 	}
+
 	//return collection of brafton ids on demand
 	public function getBraftonCollection(){
 		return $this->brafton_collection;
 	}
+
 	//update existing Shopify article
 	public function updateArticle($arr){
 		$url = $this->base.'/articles/'.$arr['id'].'.json';
 		$obj = $this->setPutData($arr);
 		$this->storePutRequest($url,$obj);
 	}
+	
 	//get article data from Shopify API
 	public function getArticles(){
 		$location = $this->getUrl;
@@ -113,8 +116,7 @@ class StoreConnect {
 				$json_meta = json_encode($meta);
 				$this->postArticleMeta($dis->article->id, $json_meta);
 			}
-		}
-		
+		}	
 	}
 
 	//ready article meta data for posting to Shopify API
@@ -138,11 +140,13 @@ class StoreConnect {
 		);
 		return $metafields;
 	}
+
 	//build url for article metafield endpoint
 	public function getMetafieldEndpoint($a){
 		$endpoint = $this->base.'/articles/'.$a.'/'.'metafields.json';
 		return $endpoint;
 	}
+
 	//array helper function to extract brafton id from shopify metafields endpoint object
 	public function metaHelper($meta_fields){
 		foreach($meta_fields as $field){
