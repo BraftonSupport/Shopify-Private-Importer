@@ -5,7 +5,7 @@
 1. Log-in to tech server as ec2-user.
 2. Navigate to /var/www/html/tech/shopify/clients
 3. Add a new directory for client in the /clients folder.
-4. Create 2 new files or copy files from an existing client folder.  The files should be importer.php and shop-data.JSON.  Importer.php will generally be identical across all clients unless it has been decided to override the MasterImporter class.  Shop-data.JSON will contain a standard JSON object with all of the client's pertinent Shopify and Brafton credentials/options.  Create a new directory called 'specs' and place the json file inside his directory. Please refer to the example folder found here in the master branch root. Here is what the final directory structure should look like:
+4. Create 2 new files or copy files from an existing client folder.  The files should be importer.php and shop-data.JSON.  Importer.php will generally be identical across all clients unless it has been decided to override the MasterImporter class.  Shop-data.JSON will contain a standard JSON object with all of the client's pertinent Shopify and Brafton credentials/options.  Create a new directory called 'specs' and place the json file inside his directory. Please refer to the example folder found here in the master branch root. Here is what the final directory structure should look like:<br />
 &nbsp;&nbsp;\{client-name} <br />
 &nbsp;&nbsp;&nbsp;importer.php <br />
 &nbsp;&nbsp;&nbsp;\specs <br />
