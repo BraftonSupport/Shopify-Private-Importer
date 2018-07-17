@@ -2,7 +2,7 @@
 
 include '../source/libraries.php';
 
-$crude = file_get_contents("/specs/shop-data.JSON");
+$crude = file_get_contents("./specs/shop-data.JSON");
 $refined = json_decode($crude);
 
 DefinedConstants::getConstants($refined);
