@@ -13,7 +13,7 @@ abstract class MasterImporter{
         foreach ($items as $item) {
             $brafton_id = $item->getId();
             $this->linker = $s->getLinkArray();
-            if(!array_key_exists($brafton_id,$this->linker)){
+            if(!array_key_exists($brafton_id,$this->linker) || $this->checkForUpdate($s, $this->linker, $item, $brafton_id)){
                 array_push($this->articles_to_post,$item);
             } else {
                 echo '<span style="font-size:22px;display: block;text-align: center;">Article  '.$brafton_id.' already exists in blog </span><br />';
