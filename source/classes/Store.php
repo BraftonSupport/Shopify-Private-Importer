@@ -1,5 +1,4 @@
 <?php 
-
 //Basic class for Shopify Blog Client
 
 class Store {
