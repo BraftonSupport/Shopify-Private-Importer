@@ -27,8 +27,8 @@ class StoreConnect {
 	}
 
 	//update existing Shopify article
-	public function updateArticle($arr){
-		$url = $this->base.'/articles/'.$arr['id'].'.json';
+	public function updateArticle($arr, $shopify_article_id){
+		$url = $this->base.'/articles/'.$arr['brafton_id'].'.json';
 		$obj = $this->setPutData($arr);
 		$this->storePutRequest($url,$obj);
 	}
@@ -106,12 +106,13 @@ class StoreConnect {
 		$obj = $this->setPostData($arr);
 				
 		$this->postUrl = $this->base.'/articles.json';
-		if(in_array($arr['id'], $this->getBraftonCollection())) { //change key name to 'brafton id'
-			$this->setPutData($arr);
+		if(in_array($arr['brafton_id'], $this->getBraftonCollection())) { 
+			$update = $this->setPutData($arr);
+			$this->updateArticle($update,$this->link_array[$arr['brafton_id']]); //passing shopify article id and json ready data, no need to add metafield
 		} else{
 			$dis = $this->storePostRequest($this->postUrl,$obj);
 			//post meta field data to newly created blog, need to send an array of objects here and loop through in order to utilize more than one metafield
-			$meta_array = $this->setPostMeta('brafton_id',$arr['id'], $article_type);
+			$meta_array = $this->setPostMeta('brafton_id',$arr['brafton_id'], $article_type);
 			foreach($meta_array as $meta){
 				$json_meta = json_encode($meta);
 				$this->postArticleMeta($dis->article->id, $json_meta);
@@ -194,7 +195,7 @@ class StoreConnect {
 		$archival = date('Y F', strtotime($raw));
 		$post_data = array('article'=> 
 					array(
-						'id'=> $article['id'],
+						'id'=> $article['brafton_id'],
 						'title'=> $article['headline'],
 						'author'=>$article['byline'], 
 						'body_html'=>$article['text'], 

@@ -18,8 +18,6 @@ class ShopifyImporter extends MasterImporter{
     // public function filterContent($html){
     //     return $html;
     // }
-
-
     // public function embeedCode($video, $something):VideoCode;
 }
 //everything above here should be included in Shopify importer constructor

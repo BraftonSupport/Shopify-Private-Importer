@@ -66,8 +66,12 @@ abstract class MasterImporter{
         foreach ($this->brafton_articles as $article) {
             $brafton_id = $article->getId();
             $this->linker = $this->storeConnection->getLinkArray();
-            if(!array_key_exists($brafton_id,$this->linker) || $this->checkForUpdate($this->storeConnection, $this->linker, $article, $brafton_id)){   //adding articles to array that either do not exist in the 
-                array_push($this->articles_to_post,$article);                                                                      //Shopify store blog or exist, but require updating
+            $existing_article = array_key_exists($brafton_id,$this->linker);
+            if($existing_article==true) {
+                $need_update = $this->checkForUpdate($this->storeConnection, $this->linker, $article, $brafton_id);
+            }
+            if(!$existing_article || $need_update){   //adding articles to array that either do not exist in the 
+                array_push($this->articles_to_post,$article);                  //Shopify store blog or exist, but require updating
             } else {
                 echo '<span style="font-size:22px;display: block;text-align: center;">Article  '.$brafton_id.' already exists in blog </span><br />';
             }
@@ -90,7 +94,7 @@ abstract class MasterImporter{
     public function importArticles($article_collection){
         foreach($article_collection as $article){
             $article_data = $this->setArticleData($article);
-            echo '<br /> Adding post '.$item->getHeadline().' to the Blog.';
+            echo '<br /> Adding post '.$article->getHeadline().' to the Blog.';
             $this->storeConnection->postArticle($article_data,'article');
         }
     }
@@ -111,7 +115,7 @@ abstract class MasterImporter{
         $large = $image[0]->getLarge();
         $cats = $a->getCategories();
         $ready_data = array('headline'=> $a->getHeadline(), 
-            'id'=> $a->getId(), //rename key 'brafton id'
+            'brafton_id'=> $a->getId(), 
             'created'=> $a->getCreatedDate(), 
             'publish'=> $a->getPublishDate(),
             'byline'=> $a->getByLine() ?: 'brafton',
