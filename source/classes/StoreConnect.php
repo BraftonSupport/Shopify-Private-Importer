@@ -106,7 +106,7 @@ class StoreConnect {
 		$obj = $this->setPostData($arr);
 				
 		$this->postUrl = $this->base.'/articles.json';
-		if(in_array($arr['id'], $this->getBraftonCollection())) {
+		if(in_array($arr['id'], $this->getBraftonCollection())) { //change key name to 'brafton id'
 			$this->setPutData($arr);
 		} else{
 			$dis = $this->storePostRequest($this->postUrl,$obj);
