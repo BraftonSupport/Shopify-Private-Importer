@@ -1,17 +1,73 @@
 <?php
 
 abstract class MasterImporter{
-
+    /**
+     * @var array
+     */
     private $linker = array();
+    /**
+     * Associative array of shopify id's with brafton idds as keys
+     *
+     * @var array
+     */
     private $articles_to_post = array();
+    /**
+     * jjjj
+     *
+     * @var array
+     */
+    private $brafton_articles;
+    /**
+     * 
+     *
+     * @var array
+     */
+    private $id_collection;
+    /**
+     * 
+     *
+     * @var object
+     */
+    private $storeConnection;
+    public function __construct(){
+        $this->setup();
+    }
 
+    //set-up method
+    private function setup(){
+        //set up a new store
+        $store = new Store(SHOPIFY_PRIVATE_KEY,SHOPIFY_PRIVATE_PW,SHOPIFY_STORE_NAME,SHOPIFY_BLOG_ID);
+
+        //set store articles endpoint from Shopify API
+        $articles_endpoint = $store->getStoreRoot()."/articles.json";
+
+        //set connection to Shopify blog
+        $this->storeConnection = new StoreConnect($store->getStoreRoot(),$articles_endpoint);
+
+        //get collection of existing brafton ids 
+        $this->id_collection = $this->storeConnection->getArticleMeta();
+
+        //connect to Brafton XML feed
+        try{
+            $brafton_connect = new ApiHandler(brafton_api,domain);
+        } catch (Exception $e) {
+            echo 'Caught exception: ',  $e->getMessage();
+            die('<br /> Please check your API key');
+        }
+
+        //get collection of articles from Brafton XML feed.
+        $this->brafton_articles = $brafton_connect->getNewsHTML();
+        if(!$this->brafton_articles) {
+            exit('Article feed is empty.<br />');
+        }
+    }
     //compare collections of articles between Brafton XML feed and Shopify Blog API, returns an array of newsListItems to be posted to shopify blog
-    public function compareCollections($items, $s) {
-        foreach ($items as $item) {
-            $brafton_id = $item->getId();
-            $this->linker = $s->getLinkArray();
-            if(!array_key_exists($brafton_id,$this->linker) || $this->checkForUpdate($s, $this->linker, $item, $brafton_id)){   //adding articles to array that either do not exist in the 
-                array_push($this->articles_to_post,$item);                                                                      //Shopify store blog or exist, but require updating
+    public function compareCollections() {
+        foreach ($this->brafton_articles as $article) {
+            $brafton_id = $article->getId();
+            $this->linker = $this->storeConnection->getLinkArray();
+            if(!array_key_exists($brafton_id,$this->linker) || $this->checkForUpdate($this->storeConnection, $this->linker, $article, $brafton_id)){   //adding articles to array that either do not exist in the 
+                array_push($this->articles_to_post,$article);                                                                      //Shopify store blog or exist, but require updating
             } else {
                 echo '<span style="font-size:22px;display: block;text-align: center;">Article  '.$brafton_id.' already exists in blog </span><br />';
             }
@@ -20,7 +76,7 @@ abstract class MasterImporter{
     }
 
     //check to see whether existing article needs updating
-    public function checkForUpdate($obj, $link, $current, $brafton_id ){
+    public function checkForUpdate($obj, $link, $current, $brafton_id=2 ){
         $single = $obj->getShopifyArticle($link[$brafton_id]);
         $shop_date = $single->article->updated_at;
         if($current->getLastModifiedDate() > $shop_date && isset($_GET['override'])) { //add get parameter test
@@ -31,12 +87,22 @@ abstract class MasterImporter{
     }
 
     //begin posting process
-    public function importArticles($package,$shop){
-        foreach($package as $item){
-            $article_data = $this->setArticleData($item);
+    public function importArticles($article_collection){
+        foreach($article_collection as $article){
+            $article_data = $this->setArticleData($article);
             echo '<br /> Adding post '.$item->getHeadline().' to the Blog.';
-            $shop->postArticle($article_data,'article');
+            $this->storeConnection->postArticle($article_data,'article');
         }
+    }
+
+    /**
+     * overridable function in ShopifyImporter classs
+     *
+     * @param string $html
+     *  @return string
+     */
+    public function filterContent($html){
+        return $html;
     }
 
     //get article data from Brafton XML feed
@@ -45,11 +111,11 @@ abstract class MasterImporter{
         $large = $image[0]->getLarge();
         $cats = $a->getCategories();
         $ready_data = array('headline'=> $a->getHeadline(), 
-            'id'=> $a->getId(), 
+            'id'=> $a->getId(), //rename key 'brafton id'
             'created'=> $a->getCreatedDate(), 
             'publish'=> $a->getPublishDate(),
             'byline'=> $a->getByLine() ?: 'brafton',
-            'text'=> $a->getText(),
+            'text'=>$this->filterContent($a->getText()),
             'excerpt'=> $a->getExtract() ?: $a->getHtmlMetaDescription(),
             'image_url'=> $large->getUrl(),
             'image_width'=> $large->getWidth(),
@@ -105,7 +171,9 @@ abstract class MasterImporter{
     }
 
     //get Brafton video blogs from video XML feed
-    public function getBraftonVideos($collection, $st){
+    public function getBraftonVideos(){
+        $collection = $this->id_collection;//rename variables later
+        $st = $this->storeConnection;
         $private = brafton_private_key;
         $public = brafton_public_key; 
         $domain = preg_replace('/https:\/\//','',domain);
@@ -135,7 +203,7 @@ abstract class MasterImporter{
                 $post_title = $thisArticle->fields['title'];
                 $post_date = $thisArticle->fields['lastModifiedDate'];
                 $post_content = $thisArticle->fields['content'];
-                $post_excerpt = $thisArticle->fields['extract']  ? $thisArticle->fields['extract'] : ' ';
+                $post_excerpt = $thisArticle->fields['extract']  ?: ' ';
                 $brafton_id = $a->id;
                 $articles_imported++;
                 if($articles_imported>5) break;
