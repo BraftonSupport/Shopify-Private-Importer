@@ -26,6 +26,6 @@ $article_collection = $shop_importer->compareCollections(); // return array of n
 if(count($article_collection)>0){
     $shop_importer->importArticles($article_collection);
 }
-if(video_import) :
+if(VIDEO_IMPORT) :
 	$videos = $shop_importer->getBraftonVideos();
 endif;
