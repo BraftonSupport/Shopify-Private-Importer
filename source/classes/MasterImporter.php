@@ -49,7 +49,7 @@ abstract class MasterImporter{
 
         //connect to Brafton XML feed
         try{
-            $brafton_connect = new ApiHandler(brafton_api,domain);
+            $brafton_connect = new ApiHandler(BRAFTON_API,DOMAIN);
         } catch (Exception $e) {
             echo 'Caught exception: ',  $e->getMessage();
             die('<br /> Please check your API key');
@@ -133,7 +133,7 @@ abstract class MasterImporter{
     //get video blog data from Brafton video XML feed
     public function setVideoData($title,$excerpt,$date,$strContent,$image,$braf_id,$kitty=null){
         $ready_video_data = array('headline'=> $title, 
-            'id'=> $braf_id, 
+            'brafton_id'=> $braf_id, 
             'created'=> $date, 
             'publish'=> $date,
             'byline'=> 'brafton',
@@ -176,15 +176,11 @@ abstract class MasterImporter{
 
     //get Brafton video blogs from video XML feed
     public function getBraftonVideos(){
-        $collection = $this->id_collection;//rename variables later
-        $st = $this->storeConnection;
-        $private = brafton_private_key;
-        $public = brafton_public_key; 
-        $domain = preg_replace('/https:\/\//','',domain);
+        $domain = preg_replace('/https:\/\//','',DOMAIN);
         $params = array('max'=>99);
         $baseURL = 'http://livevideo.'.str_replace('http://', '',$domain).'/v2/';
-        $videoClient = new AdferoVideoClient($baseURL, $public, $private);
-        $client = new AdferoClient($baseURL, $public, $private);
+        $videoClient = new AdferoVideoClient($baseURL, BRAFTON_PUBLIC_KEY, BRAFTON_PRIVATE_KEY);
+        $client = new AdferoClient($baseURL, BRAFTON_PUBLIC_KEY, BRAFTON_PRIVATE_KEY);
         $videoOutClient = $videoClient->videoOutputs();
         $photos = $client->ArticlePhotos();
         $photoURI = 'http://'.str_replace('api', 'pictures',$domain).'/v2/';
@@ -198,20 +194,19 @@ abstract class MasterImporter{
         $articles = $articleClient->ListForFeed($feedList->items[0]->id,'live',0,100);
         $articles_imported = 0;
         $articles->items = array_reverse($articles->items);
-        foreach ($articles->items as $a) {	
+        foreach ($articles->items as $a) {
             $thisArticle = $client->Articles()->Get($a->id);
-            //check if video blog does not exist in Shopify
-            if(!in_array($a->id,$collection)) {
+            if(!in_array($a->id,$this->id_collection)) {
                 $strPost = '';
                 $createCat = array();
                 $post_title = $thisArticle->fields['title'];
                 $post_date = $thisArticle->fields['lastModifiedDate'];
                 $post_content = $thisArticle->fields['content'];
-                $post_excerpt = $thisArticle->fields['extract']  ?: ' ';
+                $post_excerpt = isset($thisArticle->fields['extract'])  ?: ' ';
                 $brafton_id = $a->id;
                 $articles_imported++;
-                if($articles_imported>5) break;
-                //echo "POSTING: ".$post_title."<br>";
+                if($articles_imported>7) break;
+                echo 'Adding video blog: '.$a->id . ' : '.$thisArticle->fields['title'].'<br />';
                 $slug=str_replace(' ','-',$post_title);
                 // Enter Author Tag
                 $categories = $client->Categories();
@@ -220,7 +215,7 @@ abstract class MasterImporter{
                     $categoryId = $categories->ListForArticle($a->id,0,100)->items[0]->id;
                     $category = $categories->Get($categoryId);
                     $createCat[] = $category->name;
-                    $single_cat = $category->name ? $category->name : ' ';
+                    $single_cat = isset($category->name) ? : ' ';
                 } else {
                     $single_cat = '';
                 } 
@@ -299,8 +294,8 @@ EOC;
                     }
                     $strPost = $embedCode . $ctascript . $post_content;
                     $post_image = $this->convertProtocol($post_image);
-                    $video_cache = setVideoData($post_title,$post_excerpt, $post_date, $strPost, $post_image,$brafton_id,$single_cat);
-                    $st->postArticle($video_cache, 'video');
+                    $video_cache = $this->setVideoData($post_title,$post_excerpt, $post_date, $strPost, $post_image,$brafton_id,$single_cat);
+                    $this->storeConnection->postArticle($video_cache, 'video');
         }
     }
 }

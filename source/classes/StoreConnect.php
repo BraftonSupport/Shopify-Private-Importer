@@ -58,6 +58,8 @@ class StoreConnect {
 
 	//Use for POST requests to Shopify API
 	public function storePostRequest($location,$obj){
+		echo '<pre>';
+		var_dump(json_decode($obj));
 		$crl = curl_init();
 		curl_setopt($crl, CURLOPT_URL, $location);
 		curl_setopt($crl, CURLOPT_CUSTOMREQUEST, "POST");                                                                     
@@ -73,7 +75,8 @@ class StoreConnect {
     	$error = curl_error($crl);
     	curl_close($crl);
     	if ($errno > 0) {
-	        echo 'cURL error: ' . $error;
+			echo 'cURL error: ' . $error;
+			return $error;
 	    } else {
     		return json_decode($result);
     	}
