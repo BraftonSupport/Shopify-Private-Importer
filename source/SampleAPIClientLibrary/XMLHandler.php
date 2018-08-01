@@ -27,7 +27,7 @@ class XMLHandler {
     }
     curl_setopt ($ch, CURLOPT_URL, $url);
     curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 60);
+	curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 120);
     $feed_string = curl_exec($ch);
 	if(!$this->doc->loadXML($feed_string)) {
 		echo $url."<br>";
