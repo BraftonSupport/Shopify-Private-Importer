@@ -58,8 +58,6 @@ class StoreConnect {
 
 	//Use for POST requests to Shopify API
 	public function storePostRequest($location,$obj){
-		echo '<pre>';
-		var_dump(json_decode($obj));
 		$crl = curl_init();
 		curl_setopt($crl, CURLOPT_URL, $location);
 		curl_setopt($crl, CURLOPT_CUSTOMREQUEST, "POST");                                                                     
@@ -194,15 +192,17 @@ class StoreConnect {
 
 	//ready article general data for updating existing Shopify Article
 	public function setPutData($article){
-		$raw = substr($article['publish'],0,7);
-		$archival = date('Y F', strtotime($raw));
+		if($article['archive']==true) :
+			$raw = substr($article['publish'],0,7);
+			$archival = date('Y F', strtotime($raw));
+		endif;
 		$post_data = array('article'=> 
 					array(
 						'id'=> $article['brafton_id'],
 						'title'=> $article['headline'],
 						'author'=>$article['byline'], 
 						'body_html'=>$article['text'], 
-						'tags'=> $article['categories'], $archival,
+						'tags'=> $article['categories'], $archival = null,
 						'summary_html'=> $article['excerpt'],
 						'image'=> array(
 							'width'=>$article['image_width'],
@@ -216,14 +216,16 @@ class StoreConnect {
 	}
 	//ready general article data for posting to Shopify	API
 	public function setPostData($article){
-		$raw = substr($article['publish'],0,7);
-		$archival = date('Y F', strtotime($raw));
+		if($article['archive']==true) :
+			$raw = substr($article['publish'],0,7);
+			$archival = date('Y F', strtotime($raw));
+		endif;
 		$post_data = array('article'=> 
 					array(
 						'title'=> $article['headline'],
 						'author'=>$article['byline'], 
 						'body_html'=>$article['text'], 
-						'tags'=> $article['categories'].', '. $archival,
+						'tags'=> $article['categories'].', '. $archival=null,
 						'summary_html'=> $article['excerpt'],
 						'image'=> array(
 							'width'=>$article['image_width'],
