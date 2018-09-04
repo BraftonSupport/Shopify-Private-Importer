@@ -125,7 +125,8 @@ abstract class MasterImporter{
             'image_width'=> $large->getWidth(),
             'image_height'=> $large->getHeight(),
             'caption'=> $image[0]->getAlt(),
-            'categories'=> $this->setCatString($cats)
+            'categories'=> $this->setCatString($cats),
+            'archive' => true
         );
         return $ready_data;
     }

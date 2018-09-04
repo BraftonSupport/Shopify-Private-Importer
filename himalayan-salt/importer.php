@@ -19,26 +19,6 @@ class ShopifyImporter extends MasterImporter{
     //     return $html;
     // }
     // public function embeedCode($video, $something):VideoCode;
-    public function setArticleData($a){
-        $image = $a->getPhotos();
-        $large = $image[0]->getLarge();
-        $cats = $a->getCategories();
-        $ready_data = array('headline'=> $a->getHeadline(), 
-            'brafton_id'=> $a->getId(), 
-            'created'=> $a->getCreatedDate(), 
-            'publish'=> $a->getPublishDate(),
-            'byline'=> $a->getByLine() ?: 'brafton',
-            'text'=>$this->filterContent($a->getText()),
-            'excerpt'=> $a->getExtract() ?: $a->getHtmlMetaDescription(),
-            'image_url'=> $large->getUrl(),
-            'image_width'=> $large->getWidth(),
-            'image_height'=> $large->getHeight(),
-            'caption'=> $image[0]->getAlt(),
-            'categories'=> $this->setCatString($cats),
-            'archive' => false
-        );
-        return $ready_data;
-    }
 }
 //everything above here should be included in Shopify importer constructor
 $shop_importer = new ShopifyImporter(); //begin import process here
