@@ -103,7 +103,7 @@ abstract class MasterImporter{
      * overridable function in ShopifyImporter classs
      *
      * @param string $html
-     *  @return string
+     *  @return stringsetPost
      */
     public function filterContent($html){
         return $html;
