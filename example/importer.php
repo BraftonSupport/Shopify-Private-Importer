@@ -2,6 +2,7 @@
 
 include '../source/libraries.php';
 
+echo 'starting API query.....<br />';
 $crude = file_get_contents("./specs/shop-data.JSON");
 $refined = json_decode($crude);
 
